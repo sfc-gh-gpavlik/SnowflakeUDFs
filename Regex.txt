@@ -1,0 +1,135 @@
+/********************************************************************************************************
+*                                                                                                       *
+*                                       Snowflake Data Profiler                                         *
+*                                                                                                       *
+*  Copyright (c) 2020 Snowflake Computing Inc. All rights reserved.                                     *
+*                                                                                                       *
+*  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in  *
+*. compliance with the License. You may obtain a copy of the License at                                 *
+*                                                                                                       *
+*                               http://www.apache.org/licenses/LICENSE-2.0                              *
+*                                                                                                       *
+*  Unless required by applicable law or agreed to in writing, software distributed under the License    *
+*  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  *
+*  implied. See the License for the specific language governing permissions and limitations under the   *
+*  License.                                                                                             *
+*                                                                                                       *
+*  Copyright (c) 2020 Snowflake Computing Inc. All rights reserved.                                     *
+*                                                                                                       *
+********************************************************************************************************/
+
+-- Recommend placing in a common area, such as UTIL_DB.
+--use database UTIL_DB;
+
+create or replace function REGEXP_LIKE2(SUBJECT string, PATTERN string, PARAMETERS string)
+returns boolean
+language javascript
+as
+$$
+    const regex = RegExp(PATTERN, PARAMETERS);
+    return regex.test(SUBJECT);
+$$;
+
+create or replace function REGEXP_LIKE2(SUBJECT string, PATTERN string)
+returns boolean
+language SQL
+as
+$$
+    REGEXP_LIKE2(SUBJECT, PATTERN, '')
+$$;
+
+create or replace function RLIKE2(SUBJECT string, PATTERN string, PARAMETERS string)
+returns boolean
+language SQL
+as
+$$
+    REGEXP_LIKE2(SUBJECT, PATTERN, PARAMETERS)
+$$;
+
+create or replace function RLIKE2(SUBJECT string, PATTERN string)
+returns boolean
+language SQL
+as
+$$
+    REGEXP_LIKE2(SUBJECT, PATTERN, '')
+$$;
+
+create or replace function REGEXP_REPLACE2(SUBJECT string, PATTERN string, REPLACEMENT string, POSITION float, OCCURRENCE float, PARAMETERS string)
+returns string
+language javascript
+as
+$$
+    var params = PARAMETERS;
+    if (OCCURRENCE == 0) {
+        params = "g" + params;
+    }
+    var skippedString = SUBJECT.substring(0, POSITION - 1);
+    var searchString = SUBJECT.substring(POSITION - 1);
+    return skippedString + searchString.replace(new RegExp(PATTERN, params), REPLACEMENT);
+$$;
+
+create or replace function REGEXP_REPLACE2(SUBJECT string, PATTERN string)
+returns string
+language SQL
+as
+$$
+    REGEXP_REPLACE2(SUBJECT, PATTERN, '', 1, 0, '')
+$$;
+
+create or replace function REGEXP_REPLACE2(SUBJECT string, PATTERN string, REPLACEMENT string)
+returns string
+language SQL
+as
+$$
+    REGEXP_REPLACE2(SUBJECT, PATTERN, REPLACEMENT, 1, 0, '')
+$$;
+
+create or replace function REGEXP_REPLACE2(SUBJECT string, PATTERN string, REPLACEMENT string, POSITION int)
+returns string
+language SQL
+as
+$$
+    REGEXP_REPLACE2(SUBJECT, PATTERN, REPLACEMENT, POSITION, 0, '')
+$$;
+
+create or replace function REGEXP_REPLACE2(SUBJECT string, PATTERN string, REPLACEMENT string, POSITION int, OCCURRENCE int)
+returns string
+language SQL
+as
+$$
+    REGEXP_REPLACE2(SUBJECT, PATTERN, REPLACEMENT, POSITION, OCCURRENCE, '')
+$$;
+
+
+-- Test regex replacements:
+select regexp_replace('foobarbarfoo', 'bar(?=bar)', '***');     -- Returns error: Invalid regular expression: 'bar(?=bar)', no argument for repetition operator: ?
+select regexp_replace2('foobarbarfoo', 'bar(?=bar)', '***');    -- Returns foo***barfoo
+select regexp_replace2('foobarbarfoo', 'bar(?!bar)', '***');    -- Returns foobar***foo 
+select regexp_replace2('foobarbarfoo', '(?<=foo)bar', '***');   -- Returns foo***barfoo
+select regexp_replace2('foobarbarfoo', '(?<!foo)bar', '***');   -- Returns foobar***foo
+
+select regexp_replace2('FooBar', 'foo', '***');                 -- Returns FooBar (default is case sensitive)
+select regexp_replace2('FooBar', 'bar', '***', 4, 0, 'i');      -- Returns Foo*** (starts scanning at position 4, which is "B" at the beginning of Bar)
+select regexp_replace2('FooBar', 'bar', '***', 5, 0, 'i');      -- Returns FooBar (starts scanning at position 5, which is after the "B" in Bar)
+
+select regexp_replace2('foobarbarfoo', 'foo', '***');           -- Replaces all occurences of "foo"
+select regexp_replace2('foobarbarfoo', 'foo', '***', 1, 1);     -- Replaces only the first occurence of "foo"
+
+
+-- Test regex searches:
+
+-- Returns error: Invalid regular expression: 'bar(?=bar)', no argument for repetition operator: ?
+select rlike('foobarbarfoo', 'bar(?=bar)');  
+
+-- All of these will return TRUE for the search
+select rlike2('foobarbarfoo', 'bar(?=bar)');
+select regexp_like2('foobarbarfoo', 'bar(?=bar)');
+select regexp_like2('foobarbarfoo', 'bar(?!bar)');
+select regexp_like2('foobarbarfoo', '(?<=foo)bar');
+select regexp_like2('foobarbarfoo', '(?<!foo)bar');
+
+-- These should all return FALSE for the search
+select regexp_like2('fo0b@rb@rfo0', 'bar(?=bar)');
+select regexp_like2('fo0b@rb@rfo0', 'bar(?!bar)');
+select regexp_like2('fo0b@rb@rfo0', '(?<=foo)bar');
+select regexp_like2('fo0b@rb@rfo0', '(?<!foo)bar');
