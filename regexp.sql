@@ -1,6 +1,6 @@
 /********************************************************************************************************
 *                                                                                                       *
-*                                       Snowflake Data Profiler                                         *
+*                             Snowflake Regular Expression Extensions                                   *
 *                                                                                                       *
 *  Copyright (c) 2020 Snowflake Computing Inc. All rights reserved.                                     *
 *                                                                                                       *
