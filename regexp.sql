@@ -5,9 +5,9 @@
 *  Copyright (c) 2020 Snowflake Computing Inc. All rights reserved.                                     *
 *                                                                                                       *
 *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in  *
-*. compliance with the License. You may obtain a copy of the License at                                 *
+*  compliance with the License. You may obtain a copy of the License at                                 *
 *                                                                                                       *
-*                               http://www.apache.org/licenses/LICENSE-2.0                              *
+*                             http://www.apache.org/licenses/LICENSE-2.0                                *
 *                                                                                                       *
 *  Unless required by applicable law or agreed to in writing, software distributed under the License    *
 *  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  *
@@ -24,6 +24,9 @@ returns string
 language javascript
 as
 $$
+
+    if (SUBJECT == null || PATTERN == null) return null;
+
     if (OCCURRENCE < 1) OCCURRENCE = 1;
 
     var pos = POSITION - 1;
@@ -90,6 +93,9 @@ returns float
 language javascript
 as
 $$
+
+    if (SUBJECT == null || PATTERN == null) return null;
+
     if (OCCURRENCE < 1) OCCURRENCE = 1;
 
     var pos = POSITION - 1;
@@ -166,6 +172,7 @@ returns float
 language javascript
 as
 $$
+    if (SUBJECT == null || PATTERN == null) return null;
     var pos = POSITION - 1;
     if (pos < 0) pos = 0;
     var str = "";
@@ -204,6 +211,7 @@ returns boolean
 language javascript
 as
 $$
+    if (SUBJECT == null || PATTERN == null) return null;
     const regex = RegExp(PATTERN, PARAMETERS);
     return regex.test(SUBJECT);
 $$;
@@ -237,6 +245,7 @@ returns string
 language javascript
 as
 $$
+    if (SUBJECT == null || PATTERN == null) return null;
     var params = PARAMETERS;
     if (OCCURRENCE == 0) {
         params = "g" + params;
@@ -277,52 +286,3 @@ as
 $$
     REGEXP_REPLACE2(SUBJECT, PATTERN, REPLACEMENT, POSITION, OCCURRENCE, '')
 $$;
-
-
--- Test regex replacements:
-select regexp_replace('foobarbarfoo', 'bar(?=bar)', '***');     -- Returns error: Invalid regular expression: 'bar(?=bar)', no argument for repetition operator: ?
-select regexp_replace2('foobarbarfoo', 'bar(?=bar)', '***');    -- Returns foo***barfoo
-select regexp_replace2('foobarbarfoo', 'bar(?!bar)', '***');    -- Returns foobar***foo 
-select regexp_replace2('foobarbarfoo', '(?<=foo)bar', '***');   -- Returns foo***barfoo
-select regexp_replace2('foobarbarfoo', '(?<!foo)bar', '***');   -- Returns foobar***foo
-
-select regexp_replace2('FooBar', 'foo', '***');                 -- Returns FooBar (default is case sensitive)
-select regexp_replace2('FooBar', 'bar', '***', 4, 0, 'i');      -- Returns Foo*** (starts scanning at position 4, which is "B" at the beginning of Bar)
-select regexp_replace2('FooBar', 'bar', '***', 5, 0, 'i');      -- Returns FooBar (starts scanning at position 5, which is after the "B" in Bar)
-
-select regexp_replace2('foobarbarfoo', 'foo', '***');           -- Replaces all occurences of "foo"
-select regexp_replace2('foobarbarfoo', 'foo', '***', 1, 1);     -- Replaces only the first occurence of "foo"
-
-
--- Test regex searches:
-
--- Returns error: Invalid regular expression: 'bar(?=bar)', no argument for repetition operator: ?
-select rlike('foobarbarfoo', 'bar(?=bar)');  
-
--- All of these will return TRUE for the search
-select rlike2('foobarbarfoo', 'bar(?=bar)');
-select regexp_like2('foobarbarfoo', 'bar(?=bar)');
-select regexp_like2('foobarbarfoo', 'bar(?!bar)');
-select regexp_like2('foobarbarfoo', '(?<=foo)bar');
-select regexp_like2('foobarbarfoo', '(?<!foo)bar');
-
--- These should all return FALSE for the search
-select regexp_like2('fo0b@rb@rfo0', 'bar(?=bar)');
-select regexp_like2('fo0b@rb@rfo0', 'bar(?!bar)');
-select regexp_like2('fo0b@rb@rfo0', '(?<=foo)bar');
-select regexp_like2('fo0b@rb@rfo0', '(?<!foo)bar');
-
--- Test regex counts:
-select regexp_count('foobarbarfoo foobarbarfoo', 'bar(?=bar)');
-select regexp_count2('foobarbarfoo foobarbarfoo', 'bar(?=bar)');
-
--- regexp_instr:
-select regexp_instr2('foo foo foo foo foo', 'foo', 2, 4, 0, '', 1);     -- Returns 17
-select regexp_instr2('foo foo foo foo foo', 'foo', 2, 3, 0, '');        -- Returns 13
-select regexp_instr2('foo foo foo foo foo', 'foo', 1, 2, 1);            -- Returns 6
-select regexp_instr2('foo foo foo foo foo', 'foo', 1, 2);               -- Returns 5
-select regexp_instr2('foo foo foo foo foo', 'foo', 6);                  -- Returns 9
-select regexp_instr2('foo foo foo foo foo', 'foo');                     -- Returns 1
-
-select regexp_substr2('Customers - (NC) Raleigh','([A-Z]{2})', 1, 1, '', 0) as CUSTOMER_STATE;  -- Returns NC
-select regexp_substr2('Customers - (NC) Raleigh','([A-Z]{2})') as CUSTOMER_STATE;               -- Returns NC
