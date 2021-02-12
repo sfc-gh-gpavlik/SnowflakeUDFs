@@ -21,12 +21,9 @@
 -- Note: The GROUP_NUM parameter is not implemented and not used.
 create or replace function REGEXP_SUBSTR2(SUBJECT string, PATTERN string, POSITION float, OCCURRENCE float, PARAMETERS string, GROUP_NUM float)
 returns string
-language javascript
+language javascript strict immutable
 as
 $$
-
-    if (SUBJECT == null || PATTERN == null) return null;
-
     if (OCCURRENCE < 1) OCCURRENCE = 1;
 
     var pos = POSITION - 1;
@@ -90,7 +87,7 @@ $$;
 -- Note: The GROUP_NUM parameter is not implemented and not used.
 create or replace function REGEXP_INSTR2(SUBJECT string, PATTERN string, POSITION float, OCCURRENCE float, RETURN_OPTION float, PARAMETERS string, GROUP_NUM float)
 returns float
-language javascript
+language javascript strict immutable
 as
 $$
 
@@ -169,7 +166,7 @@ $$;
 
 create or replace function REGEXP_COUNT2(SUBJECT string, PATTERN string, POSITION float, PARAMETERS string)
 returns float
-language javascript
+language javascript strict immutable
 as
 $$
     if (SUBJECT == null || PATTERN == null) return null;
@@ -208,7 +205,7 @@ $$;
 
 create or replace function REGEXP_LIKE2(SUBJECT string, PATTERN string, PARAMETERS string)
 returns boolean
-language javascript
+language javascript strict immutable
 as
 $$
     if (SUBJECT == null || PATTERN == null) return null;
@@ -242,7 +239,7 @@ $$;
 
 create or replace function REGEXP_REPLACE2(SUBJECT string, PATTERN string, REPLACEMENT string, POSITION float, OCCURRENCE float, PARAMETERS string)
 returns string
-language javascript
+language javascript strict immutable
 as
 $$
     if (SUBJECT == null || PATTERN == null) return null;
