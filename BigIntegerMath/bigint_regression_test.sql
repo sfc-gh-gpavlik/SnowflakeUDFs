@@ -1,0 +1,452 @@
+/********************************************************************************************************
+*                                                                                                       *
+*                             Snowflake Arbitrary Precision Integer Math                                *
+*                                           Regression Test                                             *
+*                                                                                                       *
+*  Copyright (c) 2021 Snowflake Computing Inc. All rights reserved.                                     *
+*                                                                                                       *
+*  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in  *
+*  compliance with the License. You may obtain a copy of the License at                                 *
+*                                                                                                       *
+*                             http://www.apache.org/licenses/LICENSE-2.0                                *
+*                                                                                                       *
+*  Unless required by applicable law or agreed to in writing, software distributed under the License    *
+*  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  *
+*  implied. See the License for the specific language governing permissions and limitations under the   *
+*  License.                                                                                             *
+*                                                                                                       *
+*  Copyright (c) 2021 Snowflake Computing Inc. All rights reserved.                                     *
+*                                                                                                       *
+********************************************************************************************************/
+select
+
+     'TO_BIGINT with valid X input as string'                                                            as TEST_NAME
+    ,iff(to_bigint('32874602384762398476239847632948732614087231649128374690123847632901876') = '32874602384762398476239847632948732614087231649128374690123847632901876',
+         'PASS', 'FAIL')                                                                                 as TEST_RESULT
+
+union all select
+
+     'TO_BIGINT with valid X input as float'
+    ,iff(to_bigint(423984732.924234) = '423984732',
+         'PASS', 'FAIL')
+
+union all select
+
+     'TO_BIGINT with valid X input as integer'
+    ,iff(to_bigint(12345678901234567890123456789012345678) = '12345678901234567890123456789012345678',
+         'PASS', 'FAIL')
+
+union all select
+
+     'TRY_TO_BIGINT with non-numeric character in the input string'
+    ,iff(TRY_TO_BIGINT('28937469328476398476395847365239048d93278432894763294832764') is null,
+         'PASS', 'FAIL')
+
+union all select
+
+     'TRY_TO_BIGINT with valid, long string of all digits'
+    ,iff(TRY_TO_BIGINT('9837163255234957643059734168110472613957264999533553419756') = '9837163255234957643059734168110472613957264999533553419756',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ADD with valid, long integer string inputs for X and Y'
+    ,iff(BIGINT_ADD('123456789012345678901234567890123456789012345678901234567890',
+                    '987654321098765432109876543210987654321098765432109876543210') =
+                    '1111111110111111111011111111101111111110111111111011111111100',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ADD with X having a non-digit in the input string'
+    ,iff(BIGINT_ADD('12345678901234567890123456789a0123456789012345678901234567890',
+                    '987654321098765432109876543210987654321098765432109876543210')
+                    is null,
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ADD with Y having a non-digit in the input string'
+    ,iff(BIGINT_ADD('123456789012345678901234567890123456789012345678901234567890',
+                    '98765432109876543210987654321a0987654321098765432109876543210')
+                    is null,
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_DIVIDE with valid inputs for X and Y'
+    ,iff(BIGINT_DIVIDE('123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+                       '12345678901234567890123456789012345678901234567890')
+                       = '10000000000000000000000000000000000000000000000000100000000000000000000',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_DIVIDE with zero for denominator'
+    ,iff(BIGINT_DIVIDE('123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+                       '0')
+                       = 'NaN',
+         'PASS', 'FAIL')
+
+
+union all select
+
+     'BIGINT_DIV0 with valid inputs for X and Y'
+    ,iff(BIGINT_DIVIDE('123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+                       '12345678901234567890123456789012345678901234567890')
+                       = '10000000000000000000000000000000000000000000000000100000000000000000000',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_DIV0 with zero input for divisor'
+    ,iff(BIGINT_DIV0('123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+                     '0')
+                     = '0',
+         'PASS', 'FAIL')
+
+union all select
+
+     'IS_BIGINT valid input'
+    ,iff(IS_BIGINT('123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'),
+         'PASS', 'FAIL')
+
+union all select
+
+     'IS_BIGINT invalid input'
+    ,iff(IS_BIGINT('12345678901234567890123456789012345678901234567890123*4567890123456789012345678901234567890123456789012345678901234567890'),
+         'FAIL', 'PASS')
+         
+union all select
+
+     'BIGINT_MOD valid input'
+    ,iff(BIGINT_MOD('123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', 
+                    '120456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890')
+                    = '3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SIGN postitive input'
+    ,iff(BIGINT_SIGN('123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890')
+                   = '1', 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SIGN negative input'
+    ,iff(BIGINT_SIGN('-123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890')
+                   = '-1', 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SIGN zero input'
+    ,iff(BIGINT_SIGN('00000000000000000000000000000000000000000000000000000000000000000')
+                   = '0', 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SIGN invalid input'
+    ,iff(BIGINT_SIGN('100000000000000000000000000000000000000000000000000000000000000000!')
+                   is null, 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SQUARE valid negative input'
+    ,iff(BIGINT_SQUARE('-3141592650392847029487630013249119380384873264832746101012344')
+                 = '9869604381002353180979672219662926973929421440682490280228539770682098491952195690507186135906695147892893036741640374336' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SQUARE valid postitive input'
+    ,iff(BIGINT_SQUARE('3141592650392847029487630013249119380384873264832746101012344')
+                 = '9869604381002353180979672219662926973929421440682490280228539770682098491952195690507186135906695147892893036741640374336' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_FACTORIAL negative input'
+    ,iff(BIGINT_FACTORIAL('-3294')
+                 = 'NaN' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_FACTORIAL zero input'
+    ,iff(BIGINT_FACTORIAL('0')
+                 =1 , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ABS valid postitive input'
+    ,iff(BIGINT_ABS('31415926503928470294876300132491193803848732648327461010123441083468103874655183')
+                  = '31415926503928470294876300132491193803848732648327461010123441083468103874655183' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ABS valid negative input'
+    ,iff(BIGINT_ABS('-31415926503928470294876300132491193803848732648327461010123441083468103874655183')
+                  = '31415926503928470294876300132491193803848732648327461010123441083468103874655183' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ABS zero'
+    ,iff(BIGINT_ABS('0')
+                  = '0' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SQRT valid positive input'
+    ,iff(BIGINT_SQRT('31415926503928470294876300132491193803848732648327461010123441083468103874655183')
+                  = '5604991213546054283848002604494220355682' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SQRT valid negative input'
+    ,iff(BIGINT_SQRT('-31415926503928470294876300132491193803848732648327461010123441083468103874655183')
+                  = 'NaN' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SQRT less than max safe integer input'
+    ,iff(BIGINT_SQRT('4655183')
+                  = '2157' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_SQRT valid negative input'
+    ,iff(BIGINT_SQRT('-4655183')
+                  = 'NaN' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_CBRT valid positive input'
+    ,iff(BIGINT_CBRT('31415926503928470294876300132491193803848732648327461010123441083468103874655183')
+                  = '315536756823150058930667751' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_CBRT valid negative input'
+    ,iff(BIGINT_CBRT('-31415926503928470294876300132491193803848732648327461010123441083468103874655183')
+                  = 'NaN' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_CBRT less than max safe integer input'
+    ,iff(BIGINT_CBRT('4655183')
+                  = '166' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_CBRT valid negative input'
+    ,iff(BIGINT_CBRT('-4655183')
+                    = 'NaN' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_NTH_ROOT valid positive input'
+    ,iff(BIGINT_NTH_ROOT('31415926503928470294876300132491193803848732648327461010123441083468103874655183', '3')
+                  = '315536756823150058930667751' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_CBRT valid negative input'
+    ,iff(BIGINT_NTH_ROOT('-31415926503928470294876300132491193803848732648327461010123441083468103874655183', '3')
+                  = 'NaN' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_CBRT less than max safe integer input'
+    ,iff(BIGINT_NTH_ROOT('4655183', '3')
+                  = '166' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_CBRT valid negative input'
+    ,iff(BIGINT_NTH_ROOT('-4655183', '3')
+                    = 'NaN' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'AS_BIGINT valid positive input'
+    ,iff(AS_BIGINT('9386703487630485764305874615081347560187600116368181923923246340013372842739487239847'::variant)
+                    = '9386703487630485764305874615081347560187600116368181923923246340013372842739487239847' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'AS_BIGINT valid negative input'
+    ,iff(AS_BIGINT('-9386703487630485764305874615081347560187600116368181923923246340013372842739487239847'::variant)
+                    = '-9386703487630485764305874615081347560187600116368181923923246340013372842739487239847' , 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_TRUNCATE valid negative input'
+    ,iff(BIGINT_TRUNCATE('123456789012345678901234567890123456789012345678901234567890123456789',
+                         '-30' )
+                       = '123456789012345678901234567890123456789000000000000000000000000000000', 
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_TRUNC valid negative input'
+    ,iff(BIGINT_TRUNC('123456789012345678901234567890123456789012345678901234567890123456789',
+                         '-30' )
+                    = '123456789012345678901234567890123456789000000000000000000000000000000', 
+         'PASS', 'FAIL')
+
+union all select
+
+     'NULLIF valid equal inputs'
+    ,iff(BIGINT_NULLIF('123456789012345678901234567890123456789012345678901234567890123456789',
+                       '123456789012345678901234567890123456789012345678901234567890123456789' )
+                       is null, 
+         'PASS', 'FAIL')
+
+union all select
+
+     'NULLIF valid not equal input'
+    ,iff(BIGINT_NULLIF('9876543210987654321098765432109876543210987654321098765432109876543210',
+                       '123456789012345678901234567890123456789012345678901234567890123456789')
+         = '9876543210987654321098765432109876543210987654321098765432109876543210',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ZEROIFNULL valid not null input'
+    ,iff(BIGINT_ZEROIFNULL('9876543210987654321098765432109876543210987654321098765432109876543210')
+         = '9876543210987654321098765432109876543210987654321098765432109876543210',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ZEROIFNULL valid input null'
+    ,iff(BIGINT_ZEROIFNULL(null)
+         = '0',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ZEROIFNULL valid input NaN'
+    ,iff(BIGINT_ZEROIFNULL('NaN')
+         = 'NaN',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_ZEROIFNULL invalid input'
+    ,iff(BIGINT_ZEROIFNULL('32875630485764305874163508437650823764k048657328435354870875468573410001933')
+         = '0',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_IFNULL valid not null input'
+    ,iff(BIGINT_IFNULL('9876543210987654321098765432109876543210987654321098765432109876543210', '1234567890123456789012345678901234567890123456789012345678901234567890')
+         = '9876543210987654321098765432109876543210987654321098765432109876543210',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_IFNULL valid input null'
+    ,iff(BIGINT_IFNULL(null, '987654321098765432109876543210987654321098765432109876543210')
+         = '987654321098765432109876543210987654321098765432109876543210',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_IFNULL valid input NaN'
+    ,iff(BIGINT_IFNULL('NaN', '987654321098765432109876543210987654321098765432109876543210')
+         = 'NaN',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_IFNULL invalid input'
+    ,iff(BIGINT_IFNULL('32875630485764305874163508437650823764k048657328435354870875468573410001933', '987654321098765432109876543210987654321098765432109876543210')
+         = '987654321098765432109876543210987654321098765432109876543210',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_NVL valid not null input'
+    ,iff(BIGINT_NVL('9876543210987654321098765432109876543210987654321098765432109876543210', '1234567890123456789012345678901234567890123456789012345678901234567890')
+         = '9876543210987654321098765432109876543210987654321098765432109876543210',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_NVL valid input null'
+    ,iff(BIGINT_NVL(null, '987654321098765432109876543210987654321098765432109876543210')
+         = '987654321098765432109876543210987654321098765432109876543210',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_NVL valid input NaN'
+    ,iff(BIGINT_NVL('NaN', '987654321098765432109876543210987654321098765432109876543210')
+         = 'NaN',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_NVL invalid input'
+    ,iff(BIGINT_NVL('32875630485764305874163508437650823764k048657328435354870875468573410001933', '987654321098765432109876543210987654321098765432109876543210')
+         = '987654321098765432109876543210987654321098765432109876543210',
+         'PASS', 'FAIL')
+
+-------
+
+union all select
+
+     'BIGINT_NVL2 valid not null input'
+    ,iff(BIGINT_NVL2('9876543210987654321098765432109876543210987654321098765432109876543210', '1234567890123456789012345678901234567890123456789012345678901234567890',
+                     '7218347294873297862378926401294701247120847120948126491286412974612419')
+         = '1234567890123456789012345678901234567890123456789012345678901234567890',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_NVL2 valid input null'
+    ,iff(BIGINT_NVL2(null, '1234567890123456789012345678901234567890123456789012345678901234567890',
+         '7218347294873297862378926401294701247120847120948126491286412974612419') 
+         = '7218347294873297862378926401294701247120847120948126491286412974612419',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_NVL2 valid input NaN'
+    ,iff(BIGINT_NVL2('NaN', '1234567890123456789012345678901234567890123456789012345678901234567890',
+                    '7218347294873297862378926401294701247120847120948126491286412974612419')
+         = '1234567890123456789012345678901234567890123456789012345678901234567890',
+         'PASS', 'FAIL')
+
+union all select
+
+     'BIGINT_NVL2 invalid input'
+    ,iff(BIGINT_NVL2('32875630485764305874163508437650823764k048657328435354870875468573410001933', '987654321098765432109876543210987654321098765432109876543210',
+                    '7218347294873297862378926401294701247120847120948126491286412974612419')
+         = '7218347294873297862378926401294701247120847120948126491286412974612419',
+         'PASS', 'FAIL')
+;   
