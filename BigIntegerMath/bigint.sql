@@ -18,11 +18,6 @@
 *                                                                                                       *
 ********************************************************************************************************/
 
-// NOTE:  I think returning NaN is more valuable than returning null. Return NULL only if the inputs 
-//        are invalid. Return NaN if the matematical operation leads to an error.
-
-// Need regression tests for GT / LT / EQ comparisons involving NaN
-
 create or replace function TO_BIGINT(X string)
 returns string
 language javascript
