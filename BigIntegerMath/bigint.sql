@@ -26,9 +26,9 @@ as
 $$
     try{
         if (X == 'NaN') return 'NaN';
+        // if X has a decimal point, remove it and all digits after it:
         X = X.split('.')[0];
         var x = BigInt(X);
-        // if X has a decimal point, remove it and all digits after it:
         return x;
     } catch {
         throw "Cannot cast value to BigInt.";
