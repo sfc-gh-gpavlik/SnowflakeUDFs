@@ -400,10 +400,13 @@ language javascript
 strict volatile
 as
 $$
-    if (numDigits > 8388608 || numDigits < 1) return null;
+    if (numDigits > 8388608) return null;
     var x = "";
     for (var i = 0; i < numDigits; i++) {
-        x += Math.floor(Math.random() * 10) + 1;
+        x += getRandomNumberBetween(0, 9);
+    }
+    function getRandomNumberBetween(min, max){
+        return Math.floor(Math.random() * (max - min + 1) + min);
     }
     return x;
 $$;
