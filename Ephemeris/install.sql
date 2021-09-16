@@ -447,11 +447,6 @@ function getMoonPhase(fractionOfCycle) {
 
 
 function getPolarPartOfDay(theTime, sc) {
-
-    
-
-
-
     return {"daylightTime":"not calculated - polar", "sunlight":-1};
 }
 
