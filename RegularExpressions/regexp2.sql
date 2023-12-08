@@ -45,7 +45,7 @@ $$
     }
     
     if (instr != -1) {
-        return str.match(regex);
+        return str.match(regex)[OCCURRENCE-1];
     } else {
         return "";
     }
