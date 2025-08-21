@@ -1,0 +1,13 @@
+name: SnowflakeUDFs
+description: Various UDFs for Snowflake
+owner: Greg Pavlik
+contacts:
+  - email: greg@pavlik.us
+    role: maintainer
+visibility: public              
+criticality: low              
+lifecycle: active           
+data_classification: none       
+compliance: []                
+service_tier: 3         
+default_branch: main    
